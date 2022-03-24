@@ -7,7 +7,7 @@ import numpy as np
 df = pd.read_csv('medical_examination.csv', index_col='id')
 
 # Add 'overweight' column
-df['overweight'] = 10000 * df['weight'] / df['height'] / df['height']
+df['overweight'] = 10000 * df['weight'] / np.square(df['height'])
 df['overweight'] = df['overweight'].apply(lambda x: 1 if x > 25 else 0)
 
 
@@ -37,7 +37,7 @@ def draw_cat_plot():
                       y='total',
                       col='cardio',
                       hue='value',
-                      kind='bar')
+                      kind='bar').fig
 
     # Do not modify the next two lines
     fig.savefig('catplot.png')
@@ -51,7 +51,8 @@ def draw_heat_map():
                  & (df['height'] >= df['height'].quantile(0.025))
                  & (df['height'] <= df['height'].quantile(0.975))
                  & (df['weight'] >= df['weight'].quantile(0.025))
-                 & (df['weight'] <= df['weight'].quantile(0.975))]
+                 &
+                 (df['weight'] <= df['weight'].quantile(0.975))].reset_index()
 
     # Calculate the correlation matrix
     corr = df_heat.corr()
@@ -61,17 +62,17 @@ def draw_heat_map():
     mask[np.triu_indices_from(mask)] = True
 
     # Set up the matplotlib figure
-    fig = plt.figure(figsize=(12, 6))
+    fig, ax = plt.subplots(figsize=(12, 6))
 
     # Draw the heatmap with 'sns.heatmap()'
-    sns.heatmap(corr,
-                mask=mask,
-                center=0,
-                vmin=-0.5,
-                vmax=0.5,
-                annot=True,
-                fmt='.1f',
-                square=True)
+    ax = sns.heatmap(corr,
+                     mask=mask,
+                     center=0,
+                     vmin=-0.5,
+                     vmax=0.5,
+                     annot=True,
+                     fmt='.1f',
+                     square=True)
 
     # Do not modify the next two lines
     fig.savefig('heatmap.png')
